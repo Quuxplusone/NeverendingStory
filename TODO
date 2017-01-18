@@ -1,0 +1,11 @@
+- separate the idea of "world model in memory" from "backing store"
+
+- implement "backing store on local disk via pickling"
+
+- implement a static-ish landing page
+
+- nicer-looking CSS for "Create!" button
+
+- nicer-looking CSS in general (steal from Parchment?)
+
+- some kind of Ajax to get infini-scrolling instead of discrete pages?

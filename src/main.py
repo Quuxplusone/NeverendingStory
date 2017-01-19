@@ -57,11 +57,12 @@ def visit(num=None):
     result += '%s' % place.longdesc
     result += '<hr>'
     result += '<form id="form" action="/create/%s" method="post">' % num
-    if place.connections:
+    connections = place.get_connections()
+    if connections:
         result += '<ul>'
-        for connection in place.connections:
-            result += '<li><a href="/visit/%s">%s</a></li>' % (connection.successor.num, connection.how)
-        if len(place.connections) < 7:
+        for connection in connections:
+            result += '<li><a href="/visit/%s">%s</a></li>' % (connection.successor_num, connection.how)
+        if len(connections) < 7:
             result += '<li>%s</li>' % get_how_input_element('Take a different action to continue the story')
         result += '</ul>'
     else:
@@ -88,7 +89,7 @@ def create(predecessor_num):
     except KeyError:
         logging.warning('Missing some form input', exc_info=True)
         bottle.redirect('/visit/%s' % predecessor_num, 302)
-    successor_num = create_place(predecessor, how, longdesc)
+    successor_num = create_place(predecessor_num, how, longdesc)
     bottle.redirect('/visit/%s' % successor_num, 302)
 
 if __name__ == '__main__':

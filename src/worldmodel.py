@@ -1,21 +1,19 @@
+import uuid
 
-import hashlib
+def get_random_num():
+    return uuid.uuid4().hex[:16]
 
 class Place:
-    _current_num = 1
     def __init__(self, longdesc):
-        self.num = hashlib.sha256(str(Place._current_num)).hexdigest()
-        Place._current_num += 1
+        self.num = get_random_num()
         self.longdesc = longdesc
         self.connections = []
     def __str__(self):
         raise ValueError()
 
 class Connection:
-    _current_num = 1
     def __init__(self, predecessor, how, successor):
-        self.num = hashlib.sha256(str(Connection._current_num)).hexdigest()
-        Connection._current_num += 1
+        self.num = get_random_num()
         self.predecessor = predecessor
         self.how = how
         self.successor = successor
@@ -26,8 +24,11 @@ _places = {}
 _connections = {}
 _default_place = None
 
+def get_default_place():
+    return _places.get(_default_place)
+
 def get_place(num):
-    return _places.get(num, _places[_default_place])
+    return _places.get(num)
 
 def create_place(predecessor, how, longdesc):
     place = Place(longdesc)

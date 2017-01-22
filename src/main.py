@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import bottle
+import cgi
 import logging
 
 from .worldmodel import create_place, get_default_place, get_place
@@ -32,10 +33,10 @@ def get_visit_javascript():
 '''
 
 def get_how_input_element(placeholder_text):
-    return '<input type="text" name="how" id="how" pattern=".*" placeholder="%s" autocomplete="off" required></input>' % placeholder_text
+    return '<input type="text" name="how" id="how" pattern=".*" placeholder="%s" autocomplete="off" required></input>' % cgi.escape(placeholder_text)
 
 def get_longdesc_input_element(placeholder_text):
-    return '<textarea name="longdesc" id="longdesc" cols="75" rows="20" pattern="...*" placeholder="%s" autocomplete="off" required></textarea>' % placeholder_text
+    return '<textarea name="longdesc" id="longdesc" cols="75" rows="20" pattern="...*" placeholder="%s" autocomplete="off" required></textarea>' % cgi.escape(placeholder_text)
 
 @bottle.error(404)
 def error404(error):
@@ -54,14 +55,14 @@ def visit(num=None):
     result += '</head>'
     result += '<body>'
     result += '<h2>The Neverending Story</h2>'
-    result += '%s' % place.longdesc
+    result += cgi.escape(place.longdesc)
     result += '<hr>'
     result += '<form id="form" action="/create/%s" method="post">' % num
     connections = place.get_connections()
     if connections:
         result += '<ul>'
         for connection in connections:
-            result += '<li><a href="/visit/%s">%s</a></li>' % (connection.successor_num, connection.how)
+            result += '<li><a href="/visit/%s">%s</a></li>' % (connection.successor_num, cgi.escape(connection.how))
         if len(connections) < 7:
             result += '<li>%s</li>' % get_how_input_element('Take a different action to continue the story')
         result += '</ul>'

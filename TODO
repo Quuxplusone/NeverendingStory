@@ -1,8 +1,3 @@
-- separate the idea of "world model in memory" from "backing store" (DONE?)
-
-- implement "backing store on local disk via pickling" (PARTIALLY DONE)
-    when loading from disk, you have to merge the datasets
-
 - implement a static-ish landing page
 
 - nicer-looking CSS for "Create!" button

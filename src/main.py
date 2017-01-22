@@ -42,6 +42,11 @@ def get_longdesc_input_element(placeholder_text):
 def error404(error):
     return 'Nothing here, sorry'
 
+@bottle.get('/robots.txt')
+def robots_txt():
+    bottle.response.content_type = 'text/plain'
+    return 'User-agent: *\nDisallow: /\n'
+
 @bottle.get('/')
 @bottle.get('/visit/<num>')
 def visit(num=None):

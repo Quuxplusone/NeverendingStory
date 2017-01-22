@@ -3,6 +3,7 @@
 import bottle
 import cgi
 import logging
+import os
 
 from .worldmodel import create_place, get_default_place, get_place
 
@@ -99,4 +100,4 @@ def create(predecessor_num):
     bottle.redirect('/visit/%s' % successor_num, 302)
 
 if __name__ == '__main__':
-    bottle.run(host='127.0.0.1', port=8080)
+    bottle.run(host='0.0.0.0', port=os.environ.get('PORT', 8080))

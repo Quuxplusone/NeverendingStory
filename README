@@ -1,0 +1,23 @@
+Props to https://github.com/guaq/heroku-in-a-bottle !
+
+To build and deploy to localhost without Heroku:
+
+    easy_install pip
+    pip install bottle
+    ./doit
+    open http://localhost:8080/
+
+To build and deploy to localhost with Heroku:
+
+    easy_install pip
+    pip install -r requirements.txt
+    brew install heroku
+    heroku local
+    open http://localhost:5000/
+
+To build and deploy to the web with Heroku:
+
+    brew install heroku
+    heroku create neverending-story
+    git push heroku master
+    heroku open

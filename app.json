@@ -1,0 +1,13 @@
+{
+    "name": "Neverending Story",
+    "description": "A reimplementation of a web game from the 1990s.",
+    "image": "heroku/python",
+    "success_url": "/visit/home",
+    "formation": {
+        "web": {
+            "quantity": 1
+        }
+    },
+    "repository": "https://github.com/Quuxplusone/NeverendingStory",
+    "keywords": ["choose-your-own-adventure", "game", "wiki"]
+}

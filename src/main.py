@@ -2,6 +2,7 @@
 
 import bottle
 import cgi
+import hashlib
 import logging
 import os
 
@@ -90,7 +91,7 @@ def visit(num=None):
 def create(predecessor_num):
     predecessor = worldmodel.get_place(predecessor_num)
     if predecessor is None:
-        bottle.redirect('/visit/%s' % worldmodel.get_default_place().num, 302)
+        bottle.redirect('/', 302)
     try:
         how = bottle.request.forms['how'][:100]
         longdesc = bottle.request.forms['longdesc'][:10000]
@@ -99,6 +100,41 @@ def create(predecessor_num):
         bottle.redirect('/visit/%s' % predecessor_num, 302)
     successor_num = worldmodel.create_place(predecessor_num, how, longdesc)
     bottle.redirect('/visit/%s' % successor_num, 302)
+
+@bottle.get('/admin/dump')
+def get_dump():
+    bottle.response.content_type = 'text/plain'
+    return worldmodel.dumps()
+
+@bottle.get('/admin/load')
+def get_load():
+    result = '<html>'
+    result += '<head><title>The Neverending Story (admin)</title></head>'
+    result += '<body>'
+    result += '<form id="form" action="/admin/load" method="post">'
+    result += '<textarea name="data" cols="75" rows="20" autocomplete="off" required></textarea>'
+    result += '<br><textarea name="password" cols="75" rows="1" autocomplete="off" required></textarea>'
+    result += '<br><input type="submit" value="Load the database!"></input>'
+    result += '</form>'
+    result += '</body></html>'
+    return result
+
+@bottle.post('/admin/load')
+def post_load():
+    try:
+        data = bottle.request.forms['data']
+        password = bottle.request.forms['password']
+    except KeyError:
+        bottle.redirect('/', 302)
+    if hashlib.sha256(password.strip()).hexdigest() != '0ab76faa9835d7770467904cd14796c59f579eb1015f34aee505dddad8aa3b32':
+        return bottle.HTTPError(403, 'Forbidden')
+    bottle.response.content_type = 'text/plain'
+    if data.strip() == 'RESET':
+        worldmodel.reset()
+        return 'Successfully reset!'
+    else:
+        worldmodel.loads(data)
+        return 'Successfully loaded!'
 
 if __name__ == '__main__':
     backend.init()

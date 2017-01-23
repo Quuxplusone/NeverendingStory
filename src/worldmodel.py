@@ -1,4 +1,5 @@
 import logging
+import pickle
 import uuid
 
 from . import backend
@@ -6,16 +7,16 @@ from . import backend
 _places = {}
 _connections = {}
 
-def get_random_num():
+def _get_random_num():
     return uuid.uuid4().hex[:16]
 
-def get_root_num():
+def _get_root_num():
     return 'home'
 
 class Place:
     def __init__(self, num, longdesc):
         if num is None:
-            num = get_random_num()
+            num = _get_random_num()
         self.num = num
         self.longdesc = longdesc
         self.needs_insert = False
@@ -29,7 +30,7 @@ class Place:
 class Connection:
     def __init__(self, num, predecessor_num, how, successor_num):
         if num is None:
-            num = get_random_num()
+            num = _get_random_num()
         self.num = num
         self.predecessor_num = predecessor_num
         self.how = how
@@ -40,10 +41,16 @@ class Connection:
         raise ValueError()
 
 def init_data():
+    global _places, _connections
+    _connections = {}
+    _places = {
+        _get_root_num(): Place(_get_root_num(), 'You are standing at the end of a road before a small brick building.'),
+    }
+    _places[_get_root_num()].needs_insert = True
     with backend.cursor() as c:
         c.execute('CREATE TABLE places (num TEXT PRIMARY KEY, longdesc TEXT)')
         c.execute('CREATE TABLE connections (num TEXT PRIMARY KEY, how TEXT, predecessor_num TEXT, successor_num TEXT)')
-    _places[get_root_num()] = Place(get_root_num(), 'You are standing at the end of a road before a small brick building.')
+    store_data()
 
 def load_data():
     global _places, _connections
@@ -78,10 +85,36 @@ def store_data():
                 c.execute('UPDATE connections SET predecessor_num = ?, how = ?, successor_num = ? WHERE num = ?', (p.predecessor_num, p.how, p.successor_num, p.num))
                 p.needs_update = False
 
+def reset():
+    global _places, _connections
+    _places = {}
+    _connections = {}
+    with backend.cursor() as c:
+        c.execute('DROP TABLE places')
+        c.execute('DROP TABLE connections')
+    init_data()
+
+def loads(data):
+    global _places, _connections
+    (_places, _connections) = pickle.loads(data.replace('\r\n', '\n'))
+    for p in _places.values():
+        p.needs_insert = True
+    for p in _connections.values():
+        p.needs_insert = True
+    with backend.cursor() as c:
+        c.execute('DELETE FROM places')
+        c.execute('DELETE FROM connections')
+    store_data()
+
+def dumps():
+    global _places, _connections
+    load_data()
+    return pickle.dumps((_places, _connections))
+
 def get_default_place():
     global _places
     load_data()
-    return _places[get_root_num()]
+    return _places[_get_root_num()]
 
 def get_place(num):
     global _places

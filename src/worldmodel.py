@@ -18,6 +18,8 @@ class Place:
             num = get_random_num()
         self.num = num
         self.longdesc = longdesc
+        self.needs_insert = False
+        self.needs_update = False
     def __str__(self):
         raise ValueError()
     def get_connections(self):
@@ -32,6 +34,8 @@ class Connection:
         self.predecessor_num = predecessor_num
         self.how = how
         self.successor_num = successor_num
+        self.needs_insert = False
+        self.needs_update = False
     def __str__(self):
         raise ValueError()
 
@@ -39,6 +43,7 @@ def init_data():
     with backend.cursor() as c:
         c.execute('CREATE TABLE places (num TEXT PRIMARY KEY, longdesc TEXT)')
         c.execute('CREATE TABLE connections (num TEXT PRIMARY KEY, how TEXT, predecessor_num TEXT, successor_num TEXT)')
+    _places[get_root_num()] = Place(get_root_num(), 'You are standing at the end of a road before a small brick building.')
 
 def load_data():
     global _places, _connections
@@ -59,15 +64,23 @@ def store_data():
     global _places, _connections
     with backend.cursor() as c:
         for p in _places.values():
-            c.execute('INSERT INTO places VALUES (?,?)', (p.num, p.longdesc))
+            if p.needs_insert:
+                c.execute('INSERT INTO places VALUES (?,?)', (p.num, p.longdesc))
+                p.needs_insert = False
+            if p.needs_update:
+                c.execute('UPDATE places SET longdesc = ? WHERE num = ?', (p.longdesc, p.num))
+                p.needs_update = False
         for p in _connections.values():
-            c.execute('INSERT INTO connections VALUES (?,?,?,?)', (p.num, p.predecessor_num, p.how, p.successor_num))
+            if p.needs_insert:
+                c.execute('INSERT INTO connections VALUES (?,?,?,?)', (p.num, p.predecessor_num, p.how, p.successor_num))
+                p.needs_insert = False
+            if p.needs_update:
+                c.execute('UPDATE connections SET predecessor_num = ?, how = ?, successor_num = ? WHERE num = ?', (p.predecessor_num, p.how, p.successor_num, p.num))
+                p.needs_update = False
 
 def get_default_place():
     global _places
     load_data()
-    if get_root_num() not in _places:
-        create_place(None, 'Start playing', 'You are standing at the end of a road before a small brick building.')
     return _places[get_root_num()]
 
 def get_place(num):
@@ -78,11 +91,10 @@ def get_place(num):
 def create_place(predecessor_num, how, longdesc):
     global _places, _connections
     place = Place(None, longdesc)
-    if predecessor_num is None:
-        place.num = get_root_num()
+    place.needs_insert = True
     _places[place.num] = place
-    if predecessor_num is not None:
-        connection = Connection(None, predecessor_num, how, place.num)
-        _connections[connection.num] = connection
+    connection = Connection(None, predecessor_num, how, place.num)
+    connection.needs_insert = True
+    _connections[connection.num] = connection
     store_data()
     return place.num

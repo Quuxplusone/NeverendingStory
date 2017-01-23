@@ -5,7 +5,8 @@ import cgi
 import logging
 import os
 
-from .worldmodel import create_place, get_default_place, get_place
+from . import backend
+from . import worldmodel
 
 def get_visit_css():
     return '''
@@ -51,9 +52,9 @@ def robots_txt():
 @bottle.get('/')
 @bottle.get('/visit/<num>')
 def visit(num=None):
-    place = get_place(num)
+    place = worldmodel.get_place(num)
     if place is None:
-        bottle.redirect('/visit/%s' % get_default_place().num, 302)
+        bottle.redirect('/visit/%s' % worldmodel.get_default_place().num, 302)
     result = '<html>'
     result += '<head>'
     result += '<title>The Neverending Story</title>'
@@ -87,17 +88,18 @@ def visit(num=None):
 @bottle.get('/create/<predecessor_num>')
 @bottle.post('/create/<predecessor_num>')
 def create(predecessor_num):
-    predecessor = get_place(predecessor_num)
+    predecessor = worldmodel.get_place(predecessor_num)
     if predecessor is None:
-        bottle.redirect('/visit/%s' % get_default_place().num, 302)
+        bottle.redirect('/visit/%s' % worldmodel.get_default_place().num, 302)
     try:
         how = bottle.request.forms['how'][:100]
         longdesc = bottle.request.forms['longdesc'][:10000]
     except KeyError:
         logging.warning('Missing some form input', exc_info=True)
         bottle.redirect('/visit/%s' % predecessor_num, 302)
-    successor_num = create_place(predecessor_num, how, longdesc)
+    successor_num = worldmodel.create_place(predecessor_num, how, longdesc)
     bottle.redirect('/visit/%s' % successor_num, 302)
 
 if __name__ == '__main__':
+    backend.init()
     bottle.run(host='0.0.0.0', port=os.environ.get('PORT', 8080))

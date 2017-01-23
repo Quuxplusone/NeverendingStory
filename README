@@ -19,5 +19,6 @@ To build and deploy to the web with Heroku:
 
     brew install heroku
     heroku create neverending-story
+    heroku addons:create heroku-postgresql:hobby-dev
     git push heroku master
     heroku open

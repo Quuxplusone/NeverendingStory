@@ -1,6 +1,7 @@
-import os
-import sqlite3
+import logging
 import uuid
+
+from . import backend
 
 _places = {}
 _connections = {}
@@ -35,8 +36,7 @@ class Connection:
         raise ValueError()
 
 def init_data():
-    this_dir = os.path.abspath(os.path.dirname(__file__))
-    with sqlite3.connect(os.path.join(this_dir, 'data.db')) as c:
+    with backend.cursor() as c:
         c.execute('CREATE TABLE places (num TEXT PRIMARY KEY, longdesc TEXT)')
         c.execute('CREATE TABLE connections (num TEXT PRIMARY KEY, how TEXT, predecessor_num TEXT, successor_num TEXT)')
 
@@ -46,19 +46,18 @@ def load_data():
     if not _places:
         print 'loading data...'
         try:
-            this_dir = os.path.abspath(os.path.dirname(__file__))
-            with sqlite3.connect(os.path.join(this_dir, 'data.db')) as c:
+            with backend.cursor() as c:
                 for row in c.execute('SELECT * FROM places'):
                     _places[row[0]] = Place(row[0], row[1])
                 for row in c.execute('SELECT * FROM connections'):
                     _connections[row[0]] = Connection(row[0], row[1], row[2], row[3])
         except Exception:
+            logging.exception('proceeding to init_data...')
             init_data()
 
 def store_data():
     global _places, _connections
-    this_dir = os.path.abspath(os.path.dirname(__file__))
-    with sqlite3.connect(os.path.join(this_dir, 'data.db')) as c:
+    with backend.cursor() as c:
         for p in _places.values():
             c.execute('INSERT INTO places VALUES (?,?)', (p.num, p.longdesc))
         for p in _connections.values():

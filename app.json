@@ -8,6 +8,7 @@
             "quantity": 1
         }
     },
+    "addons": ["heroku-postgresql:hobby-dev"],
     "repository": "https://github.com/Quuxplusone/NeverendingStory",
     "keywords": ["choose-your-own-adventure", "game", "wiki"]
 }

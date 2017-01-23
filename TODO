@@ -4,4 +4,12 @@
 
 - nicer-looking CSS in general (steal from Parchment?)
 
-- some kind of Ajax to get infini-scrolling instead of discrete pages?
+- ability to micro-edit place text and connection text
+
+- "last accessed" timestamps on pages
+
+- "flag" pages for deletion
+
+- user accounts and sessions
+
+- "ownership" of created pages

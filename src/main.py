@@ -63,7 +63,7 @@ def visit(num=None):
     result += '</head>'
     result += '<body>'
     result += '<h2>The Neverending Story</h2>'
-    result += cgi.escape(place.longdesc)
+    result += cgi.escape(place.longdesc).replace('\n\n', '<p>')
     result += '<hr>'
     result += '<form id="form" action="/create/%s" method="post">' % num
     connections = place.get_connections()
@@ -93,8 +93,8 @@ def create(predecessor_num):
     if predecessor is None:
         bottle.redirect('/', 302)
     try:
-        how = bottle.request.forms['how'][:100]
-        longdesc = bottle.request.forms['longdesc'][:10000]
+        how = bottle.request.forms['how'][:100].replace('\r\n', '\n')
+        longdesc = bottle.request.forms['longdesc'][:10000].replace('\r\n', '\n')
     except KeyError:
         logging.warning('Missing some form input', exc_info=True)
         bottle.redirect('/visit/%s' % predecessor_num, 302)
@@ -122,8 +122,8 @@ def get_load():
 @bottle.post('/admin/load')
 def post_load():
     try:
-        data = bottle.request.forms['data']
-        password = bottle.request.forms['password']
+        data = bottle.request.forms['data'].replace('\r\n', '\n')
+        password = bottle.request.forms['password'].replace('\r\n', '\n')
     except KeyError:
         bottle.redirect('/', 302)
     if hashlib.sha256(password.strip()).hexdigest() != '0ab76faa9835d7770467904cd14796c59f579eb1015f34aee505dddad8aa3b32':

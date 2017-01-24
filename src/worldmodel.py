@@ -96,7 +96,7 @@ def reset():
 
 def loads(data):
     global _places, _connections
-    (_places, _connections) = pickle.loads(data.replace('\r\n', '\n'))
+    (_places, _connections) = pickle.loads(data)
     for p in _places.values():
         p.needs_insert = True
     for p in _connections.values():
